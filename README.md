@@ -15,11 +15,9 @@
 - `block.py` – Defines block types, weights, and special properties (like “trap” blocks).  
 - `player.py` – Handles player actions, such as placing blocks on the board.  
 - `ai.py` – AI logic for determining the best path using the weighted grid.  
-- `game_loop.py` – Updates the game state, handles input, and triggers rendering.
 
 ### `ai/` Directory
 - `astar.py` – Implements the **A\*** pathfinding algorithm.  
-- `dijkstra.py` – Optional alternative algorithm.  
 - `weights.py` – Defines block weight logic and calculates path costs.
 
 ### `rendering/`  
