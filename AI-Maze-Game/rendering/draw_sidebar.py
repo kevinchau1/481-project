@@ -27,7 +27,7 @@ BLOCK_NAMES = {
 
 # sidebar block button size + spacing
 BUTTON_SIZE    = 44
-BUTTON_PADDING = 16
+BUTTON_PADDING = 40
 BUTTON_START_Y = TITLE_BAR_HEIGHT + 30   # where the first button starts
 
 
