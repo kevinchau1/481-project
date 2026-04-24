@@ -1,79 +1,80 @@
-import heapq   # priority queue, always gives us the lowest f_cost cell next
-from weights import get_weight, is_passable
- 
-# heuristic function - estimates distance from current cell to goal
-# we use manhattan distance (no diagonals)
-def heuristic(current, goal):
-    row1, col1 = current
-    row2, col2 = goal
-    return abs(row1 - row2) + abs(col1 - col2)
+# ai/astar.py
+import heapq
+from ai.weights import get_weight, is_passable
+
+
+def heuristic(a, b):
+    # Manhattan distance heuristic
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
 
 def astar(board, start, goal):
-    # open_list = cells we still need to check
-    # we use a heap so we always check the lowest f_cost first
-    # each item is (f_cost, row, col)
-    open_list = []
-    heapq.heappush(open_list, (0, start))
+    """
+    A* pathfinding on a Board object.
 
-    # came_from lets us trace back the path at the end
-    # came_from[cell] = the cell we came from to get here
+    Parameters:
+        board : Board      - board object from game/board.py
+        start : (row, col) - starting position
+        goal  : (row, col) - target position
+
+    Returns:
+        list of (row, col) - path from start to goal
+        None               - if no path exists
+    """
+
+    # Validate start and goal positions
+    if not board.in_bounds(*start):
+        raise ValueError(f"Start {start} is outside the board.")
+    if not board.in_bounds(*goal):
+        raise ValueError(f"Goal {goal} is outside the board.")
+
+    # Check if goal is blocked by a wall
+    if not is_passable(board.get_cell(*goal)):
+        return None
+
+    # open_set: (f_score, g_score, node)
+    open_set = []
+    heapq.heappush(open_set, (0, 0, start))
+
     came_from = {}
-    came_from[start] = None
+    g_score = {start: 0}
 
-    # g_cost[cell] = total cost to reach this cell from start
-    g_cost = {}
-    g_cost[start] = 0
+    while open_set:
+        _, g, current = heapq.heappop(open_set)
 
-    while open_list:
-        # grab the cell with the lowest f_cost
-        current_f, current_cell = heapq.heappop(open_list)
+        # Reached the goal
+        if current == goal:
+            return _reconstruct_path(came_from, current)
 
-        # if we reached the goal, build and return the path
-        if current_cell == goal:
-            return build_path(came_from, start, goal)
+        # Skip if a shorter path was already found
+        if g > g_score.get(current, float("inf")):
+            continue
 
-        # check all neighboring cells
-        row, col = current_cell
-        neighbors = board.get_neighbors(row, col)
+        for neighbor in board.get_neighbors(*current):
+            cell_id = board.get_cell(*neighbor)
 
-        for neighbor in neighbors:
-            n_row, n_col = neighbor
-            block_id = board.get_cell(n_row, n_col)
-
-            # skip walls, AI cant go here
-            if not is_passable(block_id):
+            # Skip impassable cells (walls)
+            if not is_passable(cell_id):
                 continue
-            # calculate cost to move into this neighbor
-            move_cost = get_weight(block_id)
-            new_g = g_cost[current_cell] + move_cost
-            # if we havent visited this neighbor yet, or found a cheaper path to it
-            if neighbor not in g_cost or new_g < g_cost[neighbor]:
-                g_cost[neighbor] = new_g
 
-                h = heuristic(neighbor, goal)
-                f = new_g + h
+            # new g = current g + movement cost of the next cell
+            weight = get_weight(cell_id)
+            new_g = g_score[current] + weight
 
-                heapq.heappush(open_list, (f, neighbor))
-                came_from[neighbor] = current_cell
+            if new_g < g_score.get(neighbor, float("inf")):
+                g_score[neighbor] = new_g
+                f = new_g + heuristic(neighbor, goal)
+                heapq.heappush(open_set, (f, new_g, neighbor))
+                came_from[neighbor] = current
 
-    # if we get here, no path was found
-    print("no path found!")
-    return []
+    return None  # No path found
 
 
-def build_path(came_from, start, goal):
-    # trace backwards from goal to start using came_from
+def _reconstruct_path(came_from, current):
+    # Trace back from goal to start
     path = []
-    current = goal
-
-    # just in case goal was never reached
-    if goal not in came_from:
-        return []
-
-    while current is not None:
+    while current in came_from:
         path.append(current)
         current = came_from[current]
-
-    path.reverse()
-
-    return path
+    path.append(current)
+    return path[::-1]
