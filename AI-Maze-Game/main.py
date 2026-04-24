@@ -22,15 +22,6 @@ def main():
 
     board = Board()
 
-    # test blocks so we can see how it looks
-    board.place_block(1, 2, LIGHT_BLOCK)
-    board.place_block(2, 2, MEDIUM_BLOCK)
-    board.place_block(3, 2, HEAVY_BLOCK)
-    board.place_block(4, 2, TRAP_BLOCK)
-    board.place_block(1, 5, WALL_BLOCK)
-    board.place_block(2, 5, WALL_BLOCK)
-    board.place_block(3, 5, WALL_BLOCK)
-
     screen_width  = board.cols * CELL_SIZE + PADDING * 2 + SIDEBAR_WIDTH
     screen_height = board.rows * CELL_SIZE + PADDING * 2 + TITLE_BAR_HEIGHT
 
