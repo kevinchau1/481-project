@@ -75,27 +75,3 @@ class Board:
         for row in self.grid:
             print(" ".join(str(cell) for cell in row))
         print("")
-
-# Simple Test
-# Create a board
-board = Board(rows=4, cols=4)
-
-# Print empty board
-board.print_board()
-
-# Place some blocks
-board.place_block(1, 1, 1)
-board.place_block(2, 2, 2)
-
-# Print board again
-board.print_board()
-
-# Check a cell
-print("Cell (1,1):", board.get_cell(1, 1))
-
-# Check if empty
-print("Is (0,0) empty?", board.is_empty(0, 0))
-
-# Get neighbors of (1,1)
-neighbors = board.get_neighbors(1, 1)
-print("Neighbors of (1,1):", neighbors)
