@@ -1,4 +1,4 @@
-from game.block import BLOCK_LIST, EMPTY
+from game.block import BLOCK_LIST, EMPTY, WALL_BLOCK
 
 
 # Players can place any non-empty block type defined in block.py.
@@ -24,6 +24,11 @@ class Player:
     def _is_protected_cell(self, board, row, col):
         return (row, col) == board.ai_start or (row, col) == board.ai_goal
 
+    # Pre-generated maze walls are part of the map itself.
+    # Treat them as locked so the player cannot drag or delete them.
+    def _is_locked_block(self, board, row, col):
+        return board.get_cell(row, col) == WALL_BLOCK
+
     # A block can only be placed if one is selected and the target cell is usable.
     def can_place_block(self, board, row, col):
         if self.selected_block is None:
@@ -46,7 +51,8 @@ class Player:
         board.place_block(row, col, self.selected_block)
         return self.selected_block
 
-    # A move is valid when the source has a block and the destination is empty.
+    # A move is only valid if the source is a real movable block.
+    # Empty cells, protected cells, and locked wall cells cannot be moved.
     def can_move_block(self, board, from_row, from_col, to_row, to_col):
         if not board.in_bounds(from_row, from_col):
             return False
@@ -58,11 +64,13 @@ class Player:
             return False
         if board.is_empty(from_row, from_col):
             return False
+        if self._is_locked_block(board, from_row, from_col):
+            return False
         if not board.is_empty(to_row, to_col):
             return False
         return True
 
-    # Move the block by copying its id, clearing the old cell, then filling the new one.
+    # Move the block by reading its id, clearing the old cell, then filling the new one.
     def move_block(self, board, from_row, from_col, to_row, to_col):
         if not self.can_move_block(board, from_row, from_col, to_row, to_col):
             raise ValueError(
@@ -74,7 +82,8 @@ class Player:
         board.place_block(to_row, to_col, block_id)
         return block_id
 
-    # Remove a block unless the cell is protected or already empty.
+    # Remove a block unless the cell is protected, locked, or already empty.
+    # This keeps the maze walls fixed even if other placed blocks are removable.
     def remove_block(self, board, row, col):
         if not board.in_bounds(row, col):
             raise IndexError(f"Cell ({row}, {col}) is outside the board.")
@@ -82,5 +91,7 @@ class Player:
             raise ValueError("Cannot remove the AI start or goal cell.")
         if board.is_empty(row, col):
             raise ValueError(f"Cell ({row}, {col}) is already empty.")
+        if self._is_locked_block(board, row, col):
+            raise ValueError("Cannot remove a locked wall block.")
 
         board.remove_block(row, col)
