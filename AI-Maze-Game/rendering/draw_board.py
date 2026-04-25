@@ -3,6 +3,7 @@
 # grid sits on the LEFT, sidebar is on the RIGHT
 
 import pygame
+from game.config import PADDING, TITLE_BAR_HEIGHT, SIDEBAR_WIDTH
 
 # colors
 WHITE       = (255, 255, 255)
@@ -15,13 +16,9 @@ START_COLOR = (0,   200, 255)   # cyan for AI start cell
 TITLE_COLOR = (255, 255, 255)
 
 # layout constants
-CELL_SIZE        = 60
-PADDING          = 20
-TITLE_BAR_HEIGHT = 60
-SIDEBAR_WIDTH    = 200    # right panel width
 
 # helper: converts (row, col) to pixel (x, y) on screen
-def cell_to_pixel(row, col):
+def cell_to_pixel(row, col, CELL_SIZE):
     x = PADDING + col * CELL_SIZE
     y = TITLE_BAR_HEIGHT + PADDING + row * CELL_SIZE
     return x, y
@@ -63,34 +60,34 @@ def draw_title(screen, screen_width):
     screen.blit(title_surface, (title_x, title_y))
 
 
-def draw_grid(screen, board):
+def draw_grid(screen, board, CELL_SIZE):
     for row in range(board.rows):
         for col in range(board.cols):
-            x, y = cell_to_pixel(row, col)
+            x, y = cell_to_pixel(row, col, CELL_SIZE)
             rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
             pygame.draw.rect(screen, WHITE, rect)
             pygame.draw.rect(screen, GRAY, rect, 1)
 
 
-def draw_start_and_goal(screen, board):
+def draw_start_and_goal(screen, board, CELL_SIZE):
     # start cell
     start_row, start_col = board.ai_start
-    sx, sy = cell_to_pixel(start_row, start_col)
+    sx, sy = cell_to_pixel(start_row, start_col, CELL_SIZE)
     start_rect = pygame.Rect(sx, sy, CELL_SIZE, CELL_SIZE)
     pygame.draw.rect(screen, START_COLOR, start_rect)
     pygame.draw.rect(screen, GRAY, start_rect, 1)
 
     # goal cell
     goal_row, goal_col = board.ai_goal
-    gx, gy = cell_to_pixel(goal_row, goal_col)
+    gx, gy = cell_to_pixel(goal_row, goal_col, CELL_SIZE)
     goal_rect = pygame.Rect(gx, gy, CELL_SIZE, CELL_SIZE)
     pygame.draw.rect(screen, GOAL_COLOR, goal_rect)
     pygame.draw.rect(screen, GRAY, goal_rect, 1)
 
 
-def draw_board(screen, board, screen_width, screen_height):
+def draw_board(screen, board, screen_width, screen_height, CELL_SIZE):
     draw_background(screen)
     draw_sidebar_background(screen, screen_width, screen_height)
     draw_title(screen, screen_width)
-    draw_grid(screen, board)
-    draw_start_and_goal(screen, board)
+    draw_grid(screen, board, CELL_SIZE)
+    draw_start_and_goal(screen, board, CELL_SIZE)

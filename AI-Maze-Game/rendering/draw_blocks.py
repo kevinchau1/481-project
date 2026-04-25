@@ -2,9 +2,9 @@
 # draws placed blocks on the grid with neon cyberpunk style
 
 import pygame
-from draw_board import CELL_SIZE, PADDING, TITLE_BAR_HEIGHT, cell_to_pixel
-from block import EMPTY, LIGHT_BLOCK, MEDIUM_BLOCK, HEAVY_BLOCK, TRAP_BLOCK, WALL_BLOCK
-from weights import get_weight
+from rendering.draw_board import cell_to_pixel
+from game.block import EMPTY, LIGHT_BLOCK, MEDIUM_BLOCK, HEAVY_BLOCK, TRAP_BLOCK, WALL_BLOCK
+from ai.weights import get_weight
 
 # neon color palette: (base_color, glow_color, text_color)
 BLOCK_COLORS = {
@@ -19,13 +19,13 @@ BLOCK_COLORS = {
 BLOCK_INSET = 4
 
 
-def draw_block(screen, row, col, block_id, font):
+def draw_block(screen, row, col, block_id, font, CELL_SIZE):
     if block_id == EMPTY or block_id not in BLOCK_COLORS:
         return
 
     base_color, glow_color, text_color = BLOCK_COLORS[block_id]
 
-    x, y = cell_to_pixel(row, col)
+    x, y = cell_to_pixel(row, col, CELL_SIZE)
     x += BLOCK_INSET
     y += BLOCK_INSET
     w = CELL_SIZE - BLOCK_INSET * 2
@@ -59,9 +59,9 @@ def draw_block(screen, row, col, block_id, font):
     screen.blit(label, (label_x, label_y))
 
 
-def draw_all_blocks(screen, board, font):
+def draw_all_blocks(screen, board, font, CELL_SIZE):
     for row in range(board.rows):
         for col in range(board.cols):
             block_id = board.get_cell(row, col)
             if block_id != EMPTY:
-                draw_block(screen, row, col, block_id, font)
+                draw_block(screen, row, col, block_id, font, CELL_SIZE)

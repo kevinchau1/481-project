@@ -3,16 +3,19 @@
 
 import pygame
 import sys
+import os
 
-sys.path.append("game")
-sys.path.append("rendering")
-sys.path.append("ai")
+# Add project root to path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from board import Board
-from block import LIGHT_BLOCK, MEDIUM_BLOCK, HEAVY_BLOCK, TRAP_BLOCK, WALL_BLOCK
-from draw_board import draw_board, CELL_SIZE, PADDING, TITLE_BAR_HEIGHT, SIDEBAR_WIDTH
-from draw_blocks import draw_all_blocks
-from draw_sidebar import draw_sidebar, get_button_rects
+from game.board import Board
+from game.block import LIGHT_BLOCK
+from game.maze import generate_maze
+from game.config import get_board_size, compute_cell_size, get_screen_size
+from rendering.draw_board import draw_board, PADDING, TITLE_BAR_HEIGHT, SIDEBAR_WIDTH
+from rendering.draw_blocks import draw_all_blocks
+from rendering.draw_sidebar import draw_sidebar, get_button_rects
+from rendering.draw_ai import draw_ai, draw_path
 
 FPS = 60
 
@@ -20,10 +23,13 @@ FPS = 60
 def main():
     pygame.init()
 
-    board = Board()
+    difficulty = "very_hard"  # "easy"/ "medium"/ "hard"/ "very_hard"
+    rows, cols = get_board_size(difficulty)
+    board = Board(rows, cols)
 
-    screen_width  = board.cols * CELL_SIZE + PADDING * 2 + SIDEBAR_WIDTH
-    screen_height = board.rows * CELL_SIZE + PADDING * 2 + TITLE_BAR_HEIGHT
+    CELL_SIZE = compute_cell_size(rows, cols)
+
+    screen_width, screen_height = get_screen_size()
 
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("CPSC 481 AI Maze Game")
@@ -37,7 +43,7 @@ def main():
     # which block the player has selected in the sidebar
     # player.py will manage this properly later
     selected_block = LIGHT_BLOCK
-
+    generate_maze(board)
     running = True
     while running:
 
@@ -57,9 +63,11 @@ def main():
                         selected_block = block_id
 
         # draw everything
-        draw_board(screen, board, screen_width, screen_height)
-        draw_all_blocks(screen, board, font_block)
+        draw_board(screen, board, screen_width, screen_height, CELL_SIZE)
+        draw_all_blocks(screen, board, font_block, CELL_SIZE)
         draw_sidebar(screen, screen_width, screen_height, selected_block, font_label, font_title)
+
+
 
         pygame.display.flip()
         clock.tick(FPS)

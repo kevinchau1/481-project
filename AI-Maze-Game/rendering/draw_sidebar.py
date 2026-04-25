@@ -3,10 +3,11 @@
 # player will later click/drag from here to place blocks on the grid
 
 import pygame
-from draw_board import SIDEBAR_WIDTH, TITLE_BAR_HEIGHT, GOAL_COLOR
-from draw_blocks import BLOCK_COLORS
-from block import LIGHT_BLOCK, MEDIUM_BLOCK, HEAVY_BLOCK, TRAP_BLOCK, WALL_BLOCK
-from weights import get_weight
+from rendering.draw_board import TITLE_BAR_HEIGHT, GOAL_COLOR
+from rendering.draw_blocks import BLOCK_COLORS
+from game.block import LIGHT_BLOCK, MEDIUM_BLOCK, HEAVY_BLOCK, TRAP_BLOCK, WALL_BLOCK
+from ai.weights import get_weight
+from game.config import SIDEBAR_WIDTH, TITLE_BAR_HEIGHT
 
 # the blocks the player can pick from, in order
 SELECTABLE_BLOCKS = [
