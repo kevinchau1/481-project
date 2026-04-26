@@ -49,25 +49,20 @@ def main():
     screen_width, screen_height = get_screen_size()
     generate_maze(board)
 
-    # ── Player ───────────────────────────────────────────
+
     player = Player()
     player.select_block(LIGHT_BLOCK)
 
-    # ── Window ───────────────────────────────────────────
     screen_width, screen_height = get_screen_size()
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("CPSC 481 AI Maze Game")
     clock = pygame.time.Clock()
-
-    # ── Fonts ────────────────────────────────────────────
     font_block = pygame.font.SysFont("Courier", 13, bold=True)
     font_label = pygame.font.SysFont("Courier", 11)
     font_title = pygame.font.SysFont("Courier", 15, bold=True)
 
-    # ── State ────────────────────────────────────────────
     drag_source = None
 
-    # ── Game loop ────────────────────────────────────────
     running = True
     while running:
         for event in pygame.event.get():
