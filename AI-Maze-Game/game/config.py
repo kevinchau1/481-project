@@ -17,6 +17,13 @@ LEVELS = {
     "very_hard": (25, 25),
 }
 
+# budget per diff.
+BUDGETS = {
+    "easy":      100,
+    "medium":    175,
+    "hard":      300,
+    "very_hard": 450,
+}
 
 # ── Cell size calculation ───────────────────────────────
 def compute_cell_size(rows, cols):
@@ -39,6 +46,8 @@ def compute_cell_size(rows, cols):
 def get_board_size(difficulty):
     return LEVELS.get(difficulty, LEVELS["easy"])
 
+def get_budget(difficulty):
+    return BUDGETS.get(difficulty, BUDGETS["easy"])
 
 def get_screen_size():
     return FIXED_WIDTH, FIXED_HEIGHT

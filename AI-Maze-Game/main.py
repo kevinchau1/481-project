@@ -1,9 +1,7 @@
-# main.py
-# entry point of the game
-
 import pygame
 import sys
 import os
+from game.config import get_board_size, compute_cell_size, get_screen_size, get_budget
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -51,6 +49,7 @@ def main():
 
 
     player = Player()
+    player.budget = get_budget(difficulty)
     player.select_block(LIGHT_BLOCK)
 
     screen_width, screen_height = get_screen_size()
@@ -119,7 +118,7 @@ def main():
                 # draw everything
         draw_board(screen, board, screen_width, screen_height, CELL_SIZE)
         draw_all_blocks(screen, board, font_block, CELL_SIZE)
-        draw_sidebar(screen, screen_width, screen_height, player.selected_block, font_label, font_title)
+        draw_sidebar(screen, screen_width, screen_height, player.selected_block, font_label, font_title, player.budget)
 
         pygame.display.flip()
         clock.tick(FPS)

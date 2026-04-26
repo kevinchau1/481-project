@@ -1,15 +1,13 @@
 # draw_sidebar.py
 # draws the block selection panel on the right side
-# player will later click/drag from here to place blocks on the grid
 
 import pygame
-from rendering.draw_board import TITLE_BAR_HEIGHT, GOAL_COLOR
+from rendering.draw_board import GOAL_COLOR
 from rendering.draw_blocks import BLOCK_COLORS
 from game.block import LIGHT_BLOCK, MEDIUM_BLOCK, HEAVY_BLOCK, TRAP_BLOCK, WALL_BLOCK
-from ai.weights import get_weight
+from ai.weights import money_cost
 from game.config import SIDEBAR_WIDTH, TITLE_BAR_HEIGHT
 
-# the blocks the player can pick from, in order
 SELECTABLE_BLOCKS = [
     LIGHT_BLOCK,
     MEDIUM_BLOCK,
@@ -19,22 +17,19 @@ SELECTABLE_BLOCKS = [
 ]
 
 BLOCK_NAMES = {
-    LIGHT_BLOCK:  "Light",
+    LIGHT_BLOCK: "Light",
     MEDIUM_BLOCK: "Medium",
-    HEAVY_BLOCK:  "Heavy",
-    TRAP_BLOCK:   "Trap",
-    WALL_BLOCK:   "Wall",
+    HEAVY_BLOCK: "Heavy",
+    TRAP_BLOCK: "Trap",
+    WALL_BLOCK: "Wall",
 }
 
-# sidebar block button size + spacing
 BUTTON_SIZE    = 44
 BUTTON_PADDING = 40
-BUTTON_START_Y = TITLE_BAR_HEIGHT + 30   # where the first button starts
+BUTTON_START_Y = TITLE_BAR_HEIGHT + 70 # pushed down to make room for budget display
 
 
 def get_button_rects(screen_width):
-    # returns a dict of block_id -> pygame.Rect for each sidebar button
-    # used both for drawing and for click detection in player.py later
     rects = {}
     sidebar_x = screen_width - SIDEBAR_WIDTH
     center_x  = sidebar_x + SIDEBAR_WIDTH // 2
@@ -48,15 +43,48 @@ def get_button_rects(screen_width):
     return rects
 
 
-def draw_sidebar(screen, screen_width, screen_height, selected_block_id, font_label, font_title):
+def draw_budget(screen, screen_width, budget, font_label, font_title):
+    sidebar_x = screen_width - SIDEBAR_WIDTH
+    center_x  = sidebar_x + SIDEBAR_WIDTH // 2
+
+    # budget label
+    label = font_title.render("BUDGET", True, (150, 150, 170))
+    screen.blit(label, (center_x - label.get_width() // 2, TITLE_BAR_HEIGHT + 10))
+
+    # pick color based on how much budget is left
+    if budget > 60:
+        budget_color = (0, 255, 120)      # green - plenty left
+    elif budget > 25:
+        budget_color = (255, 180, 0)      # amber - getting low
+    else:
+        budget_color = (255, 50, 50)      # red - almost broke
+
+    # coin amount, big and bold
+    amount = font_title.render(f"{budget} coins", True, budget_color)
+    screen.blit(amount, (center_x - amount.get_width() // 2, TITLE_BAR_HEIGHT + 26))
+
+    # thin divider line under budget
+    pygame.draw.line(
+        screen,
+        (40, 40, 60),
+        (sidebar_x + 10, TITLE_BAR_HEIGHT + 52),
+        (screen_width - 10, TITLE_BAR_HEIGHT + 52),
+        1
+    )
+
+
+def draw_sidebar(screen, screen_width, screen_height, selected_block_id, font_label, font_title, budget):
     sidebar_x = screen_width - SIDEBAR_WIDTH
 
-    # --- sidebar title ---
+    #budget display at the top
+    draw_budget(screen, screen_width, budget, font_label, font_title)
+
+    #BLOCKS title
     title = font_title.render("BLOCKS", True, GOAL_COLOR)
     title_x = sidebar_x + SIDEBAR_WIDTH // 2 - title.get_width() // 2
-    screen.blit(title, (title_x, TITLE_BAR_HEIGHT + 8))
+    screen.blit(title, (title_x, TITLE_BAR_HEIGHT + 56))
 
-    # --- draw each block button ---
+    #draw each block button
     button_rects = get_button_rects(screen_width)
 
     for block_id in SELECTABLE_BLOCKS:
@@ -67,37 +95,52 @@ def draw_sidebar(screen, screen_width, screen_height, selected_block_id, font_la
 
         base_color, glow_color, text_color = BLOCK_COLORS[block_id]
 
+        cost = money_cost(block_id)
+        cant_afford = budget < cost and block_id != WALL_BLOCK
+
+        # dim the block if player cant afford it
+        if cant_afford:
+            draw_color = tuple(max(0, c - 80) for c in base_color)
+            border_color = (60, 60, 60)
+        else:
+            draw_color = base_color
+            border_color = glow_color
+
         # base fill
-        pygame.draw.rect(screen, base_color, rect)
+        pygame.draw.rect(screen, draw_color, rect)
 
         # top highlight strip
         highlight_rect = pygame.Rect(rect.x, rect.y, rect.w, rect.h // 4)
         highlight_color = (
-            min(base_color[0] + 60, 255),
-            min(base_color[1] + 60, 255),
-            min(base_color[2] + 60, 255),
+            min(draw_color[0] + 60, 255),
+            min(draw_color[1] + 60, 255),
+            min(draw_color[2] + 60, 255),
         )
         pygame.draw.rect(screen, highlight_color, highlight_rect)
 
-        # border — thicker + brighter if selected
+        # border — white if selected, dimmed if cant afford
         if block_id == selected_block_id:
-            pygame.draw.rect(screen, (255, 255, 255), rect, 3)   # white border = selected
+            pygame.draw.rect(screen, (255, 255, 255), rect, 3)
         else:
-            pygame.draw.rect(screen, glow_color, rect, 2)
+            pygame.draw.rect(screen, border_color, rect, 2)
 
-        # block name below the button
-        name = font_label.render(BLOCK_NAMES[block_id], True, (200, 200, 200))
+        # block name
+        name_color = (100, 100, 100) if cant_afford else (200, 200, 200)
+        name = font_label.render(BLOCK_NAMES[block_id], True, name_color)
         name_x = rect.x + rect.w // 2 - name.get_width() // 2
         screen.blit(name, (name_x, rect.bottom + 3))
 
-        # cost label below the name
-        weight = get_weight(block_id)
-        cost_text = f"cost: {weight}" if weight is not None else "blocked"
-        cost = font_label.render(cost_text, True, (120, 120, 120))
-        cost_x = rect.x + rect.w // 2 - cost.get_width() // 2
-        screen.blit(cost, (cost_x, rect.bottom + 16))
+        # coin cost label (not A* weight)
+        if block_id == WALL_BLOCK:
+            cost_text = "pre-placed"
+        else:
+            cost_text = f"{cost} coins"
+        cost_label_color = (80, 80, 80) if cant_afford else (120, 120, 120)
+        cost_surf = font_label.render(cost_text, True, cost_label_color)
+        cost_x = rect.x + rect.w // 2 - cost_surf.get_width() // 2
+        screen.blit(cost_surf, (cost_x, rect.bottom + 16))
 
-    # --- hint text at the bottom ---
+    # hint text at the bottom
     hint_lines = [
         "click to select",
         "then click grid",
