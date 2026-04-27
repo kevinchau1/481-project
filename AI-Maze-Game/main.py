@@ -1,20 +1,19 @@
 import pygame
 import sys
 import os
-from game.config import get_board_size, compute_cell_size, get_screen_size, get_budget
 
-# Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from game.board import Board
 from game.block import LIGHT_BLOCK
 from game.maze import generate_maze
-from game.config import get_board_size, compute_cell_size, get_screen_size
+from game.config import get_board_size, compute_cell_size, get_screen_size, get_budget
 from game.player import Player
+from game.ai import AI
 from rendering.draw_board import draw_board, PADDING, TITLE_BAR_HEIGHT, SIDEBAR_WIDTH
 from rendering.draw_blocks import draw_all_blocks
 from rendering.draw_sidebar import draw_sidebar, get_button_rects
-from rendering.draw_ai import draw_ai, draw_path
+from rendering.draw_ai import draw_ai
 
 FPS = 60
 
@@ -44,13 +43,13 @@ def main():
 
     CELL_SIZE = compute_cell_size(rows, cols)
 
-    screen_width, screen_height = get_screen_size()
     generate_maze(board)
 
 
     player = Player()
     player.budget = get_budget(difficulty)
     player.select_block(LIGHT_BLOCK)
+    ai = AI(board, fps=FPS, countdown_seconds=5)
 
     screen_width, screen_height = get_screen_size()
     screen = pygame.display.set_mode((screen_width, screen_height))
@@ -59,6 +58,7 @@ def main():
     font_block = pygame.font.SysFont("Courier", 13, bold=True)
     font_label = pygame.font.SysFont("Courier", 11)
     font_title = pygame.font.SysFont("Courier", 15, bold=True)
+    font_countdown = pygame.font.SysFont("Courier", 48, bold=True)
 
     drag_source = None
 
@@ -114,12 +114,21 @@ def main():
 
                 drag_source = None
 
+        ai.update()
+
         # Draw the board, blocks, and sidebar every frame.
                 # draw everything
         draw_board(screen, board, screen_width, screen_height, CELL_SIZE)
         draw_all_blocks(screen, board, font_block, CELL_SIZE)
         draw_sidebar(screen, screen_width, screen_height, player.selected_block, font_label, font_title, player.budget)
+        draw_ai(screen, ai, CELL_SIZE)
 
+        # Countdown display
+        if ai.countdown_active:
+            seconds_left = ai.get_countdown_seconds_left()
+            text = font_countdown.render(f"AI starts in: {seconds_left}", True, (255, 215, 0))
+            screen.blit(text, (20, screen_height - 70))
+            
         pygame.display.flip()
         clock.tick(FPS)
 
