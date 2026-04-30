@@ -33,6 +33,10 @@ class AI:
         self.countdown_timer   = fps * countdown_seconds
         self.countdown_active  = True
 
+        # Stopwatch — starts when countdown ends
+        self.stopwatch_frames  = 0
+        self.stopwatch_running = False
+
     # ── Pathfinding ──────────────────────────────────────
 
     def _find_path(self):
@@ -60,15 +64,23 @@ class AI:
     # ── Movement ─────────────────────────────────────────
 
     def update(self):
+        # Countdown phase
         if self.countdown_active:
             self.countdown_timer -= 1
             if self.countdown_timer <= 0:
-                self.countdown_active = False
+                self.countdown_active  = False
+                self.stopwatch_running = True
                 self._find_path()
             return
 
+        # Stopwatch
+        if self.stopwatch_running:
+            self.stopwatch_frames += 1
+
+        # Stop stopwatch when reached goal
         if self.is_at_goal():
-            self.state = STATE_AT_GOAL
+            self.state             = STATE_AT_GOAL
+            self.stopwatch_running = False
             return
 
         if not self.path:
@@ -82,13 +94,11 @@ class AI:
             weight       = get_weight(next_cell_id)
 
             if weight is None:
-                # WALL_BLOCK — completely impassable, recalculate
                 self.state = STATE_BLOCKED
                 self._find_path()
                 return
 
             if next_cell_id != 0:
-                # Non-wall block — AI steps on it and removes it
                 self.board.remove_block(*next_pos)
 
         # Move forward
@@ -122,6 +132,14 @@ class AI:
 
     def get_countdown_seconds_left(self):
         return math.ceil(self.countdown_timer / self.fps)
+    
+    def get_stopwatch_text(self):
+        """Returns formatted stopwatch string mm:ss.ff"""
+        total_seconds = self.stopwatch_frames / self.fps
+        minutes       = int(total_seconds // 60)
+        seconds       = int(total_seconds % 60)
+        centiseconds  = int((total_seconds * 100) % 100)
+        return f"{minutes:02}:{seconds:02}.{centiseconds:02}"
 
     def reset(self):
         self.position         = self.board.ai_start
@@ -132,3 +150,5 @@ class AI:
         self.state            = STATE_IDLE
         self.countdown_timer  = self.fps * self.countdown_seconds
         self.countdown_active = True
+        self.stopwatch_frames  = 0 
+        self.stopwatch_running = False

@@ -128,6 +128,13 @@ def main():
             seconds_left = ai.get_countdown_seconds_left()
             text = font_countdown.render(f"AI starts in: {seconds_left}", True, (255, 215, 0))
             screen.blit(text, (20, screen_height - 70))
+
+        # Stopwatch display
+        if not ai.countdown_active:
+            font_stopwatch = pygame.font.SysFont("Courier", 28, bold=True)
+            color = (0, 255, 120) if ai.is_at_goal() else (255, 255, 255)
+            timer_text = font_stopwatch.render(ai.get_stopwatch_text(), True, color)
+            screen.blit(timer_text, (20, screen_height - 70))
             
         pygame.display.flip()
         clock.tick(FPS)

@@ -28,7 +28,6 @@ BUTTON_SIZE    = 44
 BUTTON_PADDING = 40
 BUTTON_START_Y = TITLE_BAR_HEIGHT + 70 # pushed down to make room for budget display
 
-
 def get_button_rects(screen_width):
     rects = {}
     sidebar_x = screen_width - SIDEBAR_WIDTH
