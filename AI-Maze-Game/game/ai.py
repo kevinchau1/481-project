@@ -98,10 +98,18 @@ class AI:
                 self._find_path()
                 return
 
-            if next_cell_id != 0:
-                self.board.remove_block(*next_pos)
+        # Move forward BASED on the weighted block, it will change frames depdending on it.
+        BASE_INTERVAL = 8
+        if len(self.path) > 1:
+            next_pos = self.path[1]
+        else:
+            next_pos = None
+        if next_pos:
+            next_weight = get_weight(self.board.get_cell(*next_pos))
+            self.step_interval = BASE_INTERVAL * next_weight
+        else:
+            self.step_interval = BASE_INTERVAL
 
-        # Move forward
         self.step_timer += 1
         if self.step_timer >= self.step_interval:
             self.step_timer = 0

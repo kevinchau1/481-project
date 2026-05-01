@@ -3,18 +3,18 @@ from game.block import EMPTY, LIGHT_BLOCK, MEDIUM_BLOCK, HEAVY_BLOCK, TRAP_BLOCK
 
 BLOCK_WEIGHTS = {
     EMPTY:        1,
-    LIGHT_BLOCK:  3,
-    MEDIUM_BLOCK: 7,
-    HEAVY_BLOCK:  15,
-    TRAP_BLOCK:   20,
+    LIGHT_BLOCK:  2,
+    MEDIUM_BLOCK: 4,
+    HEAVY_BLOCK:  7,
+    TRAP_BLOCK:   10,
     WALL_BLOCK:   None,
 }
 
 BLOCK_MONEY_COSTS = {
     LIGHT_BLOCK:  10,
-    MEDIUM_BLOCK: 25,
-    HEAVY_BLOCK:  50,
-    TRAP_BLOCK:   70,
+    MEDIUM_BLOCK: 30,
+    HEAVY_BLOCK:  60,
+    TRAP_BLOCK:   90,
     WALL_BLOCK:   0,
 }
 

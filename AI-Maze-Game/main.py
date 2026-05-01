@@ -68,8 +68,21 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+
+                elif event.key == pygame.K_r:
+                    from game.block import WALL_BLOCK, EMPTY
+                    for row in range(board.rows):
+                        for col in range(board.cols):
+                            cell = board.grid[row][col]
+                            if cell != WALL_BLOCK and cell != EMPTY:
+                                board.grid[row][col] = EMPTY
+                    player.budget = get_budget(difficulty)
+                    player.select_block(LIGHT_BLOCK)
+                    ai = AI(board, fps=FPS, countdown_seconds=5)
+                    print("board reset!")
 
             # Left click either selects a sidebar block or interacts with the grid.
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
