@@ -1,8 +1,13 @@
 from game.block import BLOCK_LIST, EMPTY, WALL_BLOCK
 from ai.weights import money_cost
 
-# Players can place any non-empty block type defined in block.py.
-VALID_BLOCK_IDS = {block["id"] for block in BLOCK_LIST if block["id"] != EMPTY}
+# Players can place obstacle blocks, but not empty cells or generated maze walls.
+# Line 6 - 10 cant select wall block 
+VALID_BLOCK_IDS = {
+    block["id"]
+    for block in BLOCK_LIST
+    if block["id"] not in (EMPTY, WALL_BLOCK)
+}
 
 # how many coins each player starts with
 STARTING_BUDGET = 100

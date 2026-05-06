@@ -5,7 +5,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from game.board import Board
-from game.block import LIGHT_BLOCK
+from game.block import LIGHT_BLOCK, WALL_BLOCK
 from game.maze import generate_maze
 from game.config import get_board_size, compute_cell_size, get_screen_size, get_budget
 from game.player import Player
@@ -16,6 +16,7 @@ from rendering.draw_sidebar import draw_sidebar, get_button_rects
 from rendering.draw_ai import draw_ai
 
 FPS = 60
+COUNTDOWN_SECONDS = 10
 
 
 # Convert a mouse position on the screen into a board cell.
@@ -49,7 +50,7 @@ def main():
     player = Player()
     player.budget = get_budget(difficulty)
     player.select_block(LIGHT_BLOCK)
-    ai = AI(board, fps=FPS, countdown_seconds=5)
+    ai = AI(board, fps=FPS, countdown_seconds=COUNTDOWN_SECONDS)
 
     screen_width, screen_height = get_screen_size()
     screen = pygame.display.set_mode((screen_width, screen_height))
@@ -73,7 +74,7 @@ def main():
                     running = False
 
                 elif event.key == pygame.K_r:
-                    from game.block import WALL_BLOCK, EMPTY
+                    from game.block import EMPTY
                     for row in range(board.rows):
                         for col in range(board.cols):
                             cell = board.grid[row][col]
@@ -81,16 +82,19 @@ def main():
                                 board.grid[row][col] = EMPTY
                     player.budget = get_budget(difficulty)
                     player.select_block(LIGHT_BLOCK)
-                    ai = AI(board, fps=FPS, countdown_seconds=5)
+                    ai = AI(board, fps=FPS, countdown_seconds=COUNTDOWN_SECONDS)
                     print("board reset!")
 
             # Left click either selects a sidebar block or interacts with the grid.
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 button_rects = get_button_rects(screen_width)
                 clicked_sidebar = False
+
                 for block_id, rect in button_rects.items():
                     if rect.collidepoint(event.pos):
-                        player.select_block(block_id)
+                        # check if the player selects a WALL_BLOCK
+                        if block_id != WALL_BLOCK:
+                            player.select_block(block_id)
                         clicked_sidebar = True
                         break
                 # If the click was on the sidebar, do not also treat it like a board click.
