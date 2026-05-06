@@ -14,7 +14,8 @@
 - `board.py` – Defines the grid/board, including dimensions and methods to update cells.  
 - `block.py` – Defines block types, weights, and special properties (like “trap” blocks).  
 - `player.py` – Handles player actions, such as placing blocks on the board.  
-- `ai.py` – AI logic for determining the best path using the weighted grid.  
+- `ai.py` – AI logic for determining the best path using the weighted grid.
+- `config.py` – Configurations for game window dimensions, difficulties, and budgets.
 
 ### `ai/` Directory
 - `astar.py` – Implements the **A\*** pathfinding algorithm.  
@@ -24,8 +25,4 @@
 - `draw_board.py` – Draws the grid and background.  
 - `draw_blocks.py` – Draws blocks with proper weights and styles.  
 - `draw_ai.py` – Draws the AI and optionally its predicted path.
-
-### `assets/`  
-- `images/` – Sprites and block images.  
-- `sounds/` – Game sounds and effects.  
-- `fonts/` – Fonts for displaying scores, messages, and UI.
+- `draw_sidebar.py` – Draws the sidebar of weighted blocks.
