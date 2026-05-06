@@ -4,28 +4,27 @@ from ai.astar import astar
 from ai.weights import get_weight
 from game.block import WALL_BLOCK
 
-
 # AI states
-STATE_IDLE      = "idle"
-STATE_MOVING    = "moving"
-STATE_BLOCKED   = "blocked"
-STATE_AT_GOAL   = "at_goal"
+STATE_IDLE    = "idle"
+STATE_MOVING  = "moving"
+STATE_BLOCKED = "blocked"
+STATE_AT_GOAL = "at_goal"
 
 
 class AI:
+    BASE_INTERVAL = 8
+
     def __init__(self, board, fps=60, countdown_seconds=5):
         self.board         = board
         self.position      = board.ai_start
         self.path          = []
         self.path_cost     = None
         self.step_timer    = 0
-        self.step_interval = 8  # Faster movement
-
-        # Direction AI is facing (for rendering)
-        self.direction     = (0, 1)  # Default facing right (row_delta, col_delta)
-
-        # Current state (for rendering)
+        self.step_interval = self.BASE_INTERVAL
+        self.direction     = (0, 1)
         self.state         = STATE_IDLE
+        self.removal_timer   = 0
+        self.pending_removal = None
 
         # Countdown
         self.fps               = fps
@@ -33,7 +32,7 @@ class AI:
         self.countdown_timer   = fps * countdown_seconds
         self.countdown_active  = True
 
-        # Stopwatch — starts when countdown ends
+        # Stopwatch
         self.stopwatch_frames  = 0
         self.stopwatch_running = False
 
@@ -77,7 +76,7 @@ class AI:
         if self.stopwatch_running:
             self.stopwatch_frames += 1
 
-        # Stop stopwatch when reached goal
+        # Stop when reached goal
         if self.is_at_goal():
             self.state             = STATE_AT_GOAL
             self.stopwatch_running = False
@@ -98,17 +97,27 @@ class AI:
                 self._find_path()
                 return
 
-        # Move forward BASED on the weighted block, it will change frames depdending on it.
-        BASE_INTERVAL = 8
-        if len(self.path) > 1:
-            next_pos = self.path[1]
+            if next_cell_id != 0:
+                # Start removal timer if not already waiting
+                if self.pending_removal != next_pos:
+                    self.pending_removal = next_pos
+                    self.removal_timer   = self.BASE_INTERVAL * weight
+                    return
+
+                # Count down removal timer
+                self.removal_timer -= 1
+                if self.removal_timer > 0:
+                    return
+
+                # Timer done — remove block and recalculate
+                self.board.remove_block(*self.pending_removal)
+                self.pending_removal = None
+                self._find_path()
+                return
+
+            self.step_interval = self.BASE_INTERVAL
         else:
-            next_pos = None
-        if next_pos:
-            next_weight = get_weight(self.board.get_cell(*next_pos))
-            self.step_interval = BASE_INTERVAL * next_weight
-        else:
-            self.step_interval = BASE_INTERVAL
+            self.step_interval = self.BASE_INTERVAL
 
         self.step_timer += 1
         if self.step_timer >= self.step_interval:
@@ -119,13 +128,10 @@ class AI:
         """Move AI one step forward and update direction."""
         if len(self.path) > 1:
             next_pos = self.path[1]
-
-            # Update direction based on movement
-            dr = next_pos[0] - self.position[0]
-            dc = next_pos[1] - self.position[1]
+            dr       = next_pos[0] - self.position[0]
+            dc       = next_pos[1] - self.position[1]
             if (dr, dc) != (0, 0):
                 self.direction = (dr, dc)
-
             self.path.pop(0)
             self.position = self.path[0]
             self.state    = STATE_MOVING
@@ -140,7 +146,7 @@ class AI:
 
     def get_countdown_seconds_left(self):
         return math.ceil(self.countdown_timer / self.fps)
-    
+
     def get_stopwatch_text(self):
         """Returns formatted stopwatch string mm:ss.ff"""
         total_seconds = self.stopwatch_frames / self.fps
@@ -150,13 +156,16 @@ class AI:
         return f"{minutes:02}:{seconds:02}.{centiseconds:02}"
 
     def reset(self):
-        self.position         = self.board.ai_start
-        self.step_timer       = 0
-        self.path             = []
-        self.path_cost        = None
-        self.direction        = (0, 1)
-        self.state            = STATE_IDLE
-        self.countdown_timer  = self.fps * self.countdown_seconds
-        self.countdown_active = True
-        self.stopwatch_frames  = 0 
+        self.position          = self.board.ai_start
+        self.step_timer        = 0
+        self.step_interval     = self.BASE_INTERVAL
+        self.path              = []
+        self.path_cost         = None
+        self.direction         = (0, 1)
+        self.state             = STATE_IDLE
+        self.countdown_timer   = self.fps * self.countdown_seconds
+        self.countdown_active  = True
+        self.stopwatch_frames  = 0
         self.stopwatch_running = False
+        self.removal_timer   = 0
+        self.pending_removal = None
