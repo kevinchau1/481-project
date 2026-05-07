@@ -4,7 +4,26 @@
 **AI Maze Game** is a **weighted-block puzzle game** built in Python using **Pygame**, where the player places blocks of different weights to block an AI from reaching a goal. The AI uses **A\*** pathfinding to navigate the grid efficiently based on block weights.  
 
 ---
+## Requirements
 
+- Python 3.10 or higher
+- Pygame
+
+---
+# How to setup
+**1. Clone the repository**
+git clone https://github.com/kevinchau1/481-project.git
+cd 481-project
+
+**2. Install dependencies**
+pip install pygame
+
+---
+## How to Run
+
+python main.py
+
+---
 ## Project Structure
 ### `main.py`
 - Entry point of the game.
