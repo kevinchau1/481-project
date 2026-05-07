@@ -12,8 +12,8 @@
 ---
 # How to setup
 **1. Clone the repository**
-git clone https://github.com/kevinchau1/481-project.git
-cd 481-project
+``git clone https://github.com/kevinchau1/481-project.git``<br>
+``cd 481-project``
 
 **2. Install dependencies**
 pip install pygame
