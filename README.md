@@ -21,7 +21,7 @@ pip install pygame
 ---
 ## How to Run<br>
 
-python main.py
+``python main.py``
 
 ---
 ## Project Structure
