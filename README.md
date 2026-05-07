@@ -11,15 +11,15 @@
 
 ---
 # How to setup
-**1. Clone the repository**
+**1. Clone the repository**<br>
 ``git clone https://github.com/kevinchau1/481-project.git``<br>
 ``cd 481-project``
 
-**2. Install dependencies**
+**2. Install dependencies**<br>
 pip install pygame
 
 ---
-## How to Run
+## How to Run<br>
 
 python main.py
 
